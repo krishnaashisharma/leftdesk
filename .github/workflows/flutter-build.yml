@@ -51,8 +51,8 @@ jobs:
   generate-bridge:
     uses: ./.github/workflows/bridge.yml
 
-  build-LeftDeskTempTopMostWindow:
-    uses: ./.github/workflows/third-party-LeftDeskTempTopMostWindow.yml
+  build-RustDeskTempTopMostWindow:
+    uses: ./.github/workflows/third-party-RustDeskTempTopMostWindow.yml
     with:
       upload-artifact: ${{ inputs.upload-artifact }}
       target: windows-2022
@@ -64,7 +64,7 @@ jobs:
 
   build-for-windows-flutter:
     name: ${{ matrix.job.target }}
-    needs: [build-LeftDeskTempTopMostWindow, generate-bridge]
+    needs: [build-RustDeskTempTopMostWindow, generate-bridge]
     runs-on: ${{ matrix.job.os }}
     strategy:
       fail-fast: false
@@ -170,7 +170,7 @@ jobs:
           mv ./flutter/build/windows/x64/runner/Release ./leftdesk
 
           # Download usbmmidd_v2.zip and extract it to ./leftdesk
-          Invoke-WebRequest -Uri https://github.com/leftdesk-org/rdev/releases/download/usbmmidd_v2/usbmmidd_v2.zip -OutFile usbmmidd_v2.zip
+          Invoke-WebRequest -Uri https://github.com/rustdesk-org/rdev/releases/download/usbmmidd_v2/usbmmidd_v2.zip -OutFile usbmmidd_v2.zip
           Expand-Archive usbmmidd_v2.zip -DestinationPath .
           Remove-Item -Path usbmmidd_v2\Win32 -Recurse
           Remove-Item -Path "usbmmidd_v2\deviceinstaller64.exe", "usbmmidd_v2\deviceinstaller.exe", "usbmmidd_v2\usbmmidd.bat"
@@ -219,7 +219,7 @@ jobs:
             ls -l ./libs/portable/Runner.res;
           fi
 
-      - name: Download LeftDeskTempTopMostWindow artifacts
+      - name: Download RustDeskTempTopMostWindow artifacts
         uses: actions/download-artifact@master
         if: ${{ inputs.upload-artifact }}
         with:
@@ -314,7 +314,7 @@ jobs:
           submodules: recursive
 
       - name: Install LLVM and Clang
-        uses: leftdesk-org/install-llvm-action-32bit@master
+        uses: rustdesk-org/install-llvm-action-32bit@master
         with:
           version: ${{ env.LLVM_VERSION }}
 
@@ -368,7 +368,7 @@ jobs:
           mv ./target/release/leftdesk.exe ./Release/leftdesk.exe
           curl -LJ -o ./Release/sciter.dll https://github.com/c-smile/sciter-sdk/raw/master/bin.win/x32/sciter.dll
           echo "output_folder=./Release" >> $GITHUB_OUTPUT
-          curl -LJ -o ./usbmmidd_v2.zip https://github.com/leftdesk-org/rdev/releases/download/usbmmidd_v2/usbmmidd_v2.zip
+          curl -LJ -o ./usbmmidd_v2.zip https://github.com/rustdesk-org/rdev/releases/download/usbmmidd_v2/usbmmidd_v2.zip
           unzip usbmmidd_v2.zip
           # Do not remove x64 files, because the user may run the 32bit version on a 64bit system.
           # Do not remove ./usbmmidd_v2/deviceinstaller64.exe, as x86 exe cannot install and uninstall drivers when running on x64,
@@ -1409,7 +1409,7 @@ jobs:
           name: bridge-artifact
           path: ./
 
-      - uses: leftdesk-org/run-on-arch-action@amd64-support
+      - uses: rustdesk-org/run-on-arch-action@amd64-support
         name: Build leftdesk
         id: vcpkg
         if: matrix.job.arch == 'x86_64' || env.UPLOAD_ARTIFACT == 'true'
@@ -1611,7 +1611,7 @@ jobs:
 
       - name: Build archlinux package
         if: matrix.job.arch == 'x86_64' && env.UPLOAD_ARTIFACT == 'true'
-        uses: leftdesk-org/arch-makepkg-action@master
+        uses: rustdesk-org/arch-makepkg-action@master
         with:
           packages:
           scripts: |
@@ -1693,7 +1693,7 @@ jobs:
           RUST_TOOLCHAIN_VERSION=$(cargo --version | awk '{print $2}')
           echo "RUST_TOOLCHAIN_VERSION=$RUST_TOOLCHAIN_VERSION" >> $GITHUB_ENV
 
-      - uses: leftdesk-org/run-on-arch-action@amd64-support
+      - uses: rustdesk-org/run-on-arch-action@amd64-support
         name: Build leftdesk sciter binary for ${{ matrix.job.arch }}
         id: vcpkg
         with:
@@ -1889,7 +1889,7 @@ jobs:
           sudo apt-get install -y libarchive-tools libfuse2
           # set-up appimage-builder
           # https://github.com/AppImage/AppImageKit/issues/1395
-          sudo pip3 install git+https://github.com/leftdesk-org/appimage-builder.git
+          sudo pip3 install git+https://github.com/rustdesk-org/appimage-builder.git
           # run appimage-builder
           pushd appimage
           sudo appimage-builder --skip-tests --recipe ./AppImageBuilder-${{ matrix.job.arch }}.yml
@@ -1953,7 +1953,7 @@ jobs:
         run: |
           mv leftdesk-${{ env.VERSION }}-${{ matrix.job.arch }}${{ matrix.job.suffix }}.deb flatpak/leftdesk.deb
 
-      - uses: leftdesk-org/run-on-arch-action@amd64-support
+      - uses: rustdesk-org/run-on-arch-action@amd64-support
         name: Build leftdesk flatpak package for ${{ matrix.job.arch }}
         id: flatpak
         with:
