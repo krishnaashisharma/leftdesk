@@ -2828,11 +2828,11 @@ mod cert {
     use hbb_common::ResultType;
 
     extern "C" {
-        fn DeleteLeftDeskTestCertsW();
+        fn DeleteRustDeskTestCertsW();
     }
     pub fn uninstall_cert() -> ResultType<()> {
         unsafe {
-            DeleteLeftDeskTestCertsW();
+            DeleteRustDeskTestCertsW();
         }
         Ok(())
     }

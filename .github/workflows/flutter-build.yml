@@ -1549,7 +1549,7 @@ jobs:
             export CARGO_INCREMENTAL=0
             export DEB_ARCH=${{ matrix.job.deb_arch }}
             python3 ./build.py --flutter --skip-cargo
-            for name in leftdesk*??.deb; do
+            for name in leftdesk*.deb; do
               mv "$name" "${name%%.deb}-${{ matrix.job.arch }}.deb"
             done
 
@@ -1832,7 +1832,7 @@ jobs:
       - name: Rename leftdesk
         shell: bash
         run: |
-          for name in leftdesk*??.deb; do
+          for name in leftdesk*.deb; do
               # use cp to duplicate deb files to fit other packages.
               cp "$name" "${name%%.deb}-${{ matrix.job.arch }}-sciter.deb"
           done
