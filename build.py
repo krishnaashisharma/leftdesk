@@ -342,7 +342,7 @@ def build_flutter_deb(version, features):
     system2(
         'cp ../res/leftdesk.desktop tmpdeb/usr/share/applications/leftdesk.desktop')
     system2(
-        'cp ../res/rustdesk-link.desktop tmpdeb/usr/share/applications/rustdesk-link.desktop')
+        'cp ../res/leftdesk-link.desktop tmpdeb/usr/share/applications/leftdesk-link.desktop')
     system2(
         'cp ../res/startwm.sh tmpdeb/etc/rustdesk/')
     system2(
@@ -385,7 +385,7 @@ def build_deb_from_folder(version, binary_folder):
     system2(
         'cp ../res/leftdesk.desktop tmpdeb/usr/share/applications/leftdesk.desktop')
     system2(
-        'cp ../res/rustdesk-link.desktop tmpdeb/usr/share/applications/rustdesk-link.desktop')
+        'cp ../res/leftdesk-link.desktop tmpdeb/usr/share/applications/leftdesk-link.desktop')
     system2(
         "echo \"#!/bin/sh\" >> tmpdeb/usr/share/leftdesk/files/polkit && chmod a+x tmpdeb/usr/share/leftdesk/files/polkit")
 
@@ -614,7 +614,7 @@ def main():
                 system2(
                     'cp res/leftdesk.desktop tmpdeb/usr/share/applications/leftdesk.desktop')
                 system2(
-                    'cp res/rustdesk-link.desktop tmpdeb/usr/share/applications/rustdesk-link.desktop')
+                    'cp res/leftdesk-link.desktop tmpdeb/usr/share/applications/leftdesk-link.desktop')
                 os.system('mkdir -p tmpdeb/etc/rustdesk/')
                 os.system('cp -a res/startwm.sh tmpdeb/etc/rustdesk/')
                 os.system('mkdir -p tmpdeb/etc/X11/rustdesk/')

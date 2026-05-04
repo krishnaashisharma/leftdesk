@@ -28,7 +28,7 @@ mkdir -p "%{buildroot}/usr/share/leftdesk" && cp -r ${HBB}/flutter/build/linux/x
 mkdir -p "%{buildroot}/usr/bin"
 install -Dm 644 $HBB/res/leftdesk.service -t "%{buildroot}/usr/share/leftdesk/files"
 install -Dm 644 $HBB/res/leftdesk.desktop -t "%{buildroot}/usr/share/leftdesk/files"
-install -Dm 644 $HBB/res/rustdesk-link.desktop -t "%{buildroot}/usr/share/leftdesk/files"
+install -Dm 644 $HBB/res/leftdesk-link.desktop -t "%{buildroot}/usr/share/leftdesk/files"
 install -Dm 644 $HBB/res/128x128@2x.png "%{buildroot}/usr/share/icons/hicolor/256x256/apps/leftdesk.png"
 install -Dm 644 $HBB/res/scalable.svg "%{buildroot}/usr/share/icons/hicolor/scalable/apps/leftdesk.svg"
 
@@ -38,7 +38,7 @@ install -Dm 644 $HBB/res/scalable.svg "%{buildroot}/usr/share/icons/hicolor/scal
 /usr/share/icons/hicolor/256x256/apps/leftdesk.png
 /usr/share/icons/hicolor/scalable/apps/leftdesk.svg
 /usr/share/leftdesk/files/leftdesk.desktop
-/usr/share/leftdesk/files/rustdesk-link.desktop
+/usr/share/leftdesk/files/leftdesk-link.desktop
 
 %changelog
 # let's skip this for now
@@ -57,7 +57,7 @@ esac
 %post
 cp /usr/share/leftdesk/files/leftdesk.service /etc/systemd/system/leftdesk.service
 cp /usr/share/leftdesk/files/leftdesk.desktop /usr/share/applications/
-cp /usr/share/leftdesk/files/rustdesk-link.desktop /usr/share/applications/
+cp /usr/share/leftdesk/files/leftdesk-link.desktop /usr/share/applications/
 ln -sf /usr/share/leftdesk/leftdesk /usr/bin/leftdesk
 systemctl daemon-reload
 systemctl enable leftdesk
@@ -86,7 +86,7 @@ case "$1" in
     rmdir /usr/local/leftdesk || true
     rmdir /usr/share/leftdesk || true
     rm /usr/share/applications/leftdesk.desktop || true
-    rm /usr/share/applications/rustdesk-link.desktop || true
+    rm /usr/share/applications/leftdesk-link.desktop || true
     update-desktop-database
   ;;
   1)

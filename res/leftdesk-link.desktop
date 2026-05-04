@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=LeftDesk Link
+MimeType=x-scheme-handler/leftdesk;
+TryExec=leftdesk
+Exec=leftdesk %u
+Icon=leftdesk
+Terminal=false
+Type=Application
+StartupNotify=false
+Categories=Network;RemoteAccess;
+NoDisplay=true
+StartupWMClass=leftdesk
