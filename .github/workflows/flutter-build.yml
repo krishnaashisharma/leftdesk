@@ -259,7 +259,7 @@ jobs:
         if: env.UPLOAD_ARTIFACT == 'true'
         run: |
           pushd ./res/msi
-          python preprocess.py --arp -d ../../leftdesk
+          python preprocess.py --arp -d ../../leftdesk --app-name LeftDesk --version ${{ env.VERSION }}
           nuget restore msi.sln
           msbuild msi.sln -p:Configuration=Release -p:Platform=x64 /p:TargetVersion=Windows10
           mv ./Package/bin/x64/Release/en-us/Package.msi ../../SignOutput/leftdesk-${{ env.VERSION }}-${{ matrix.job.arch }}.msi
@@ -748,9 +748,9 @@ jobs:
           security unlock-keychain -p ${{ secrets.MACOS_P12_PASSWORD }} leftdesk.keychain
           # start sign the leftdesk.app and dmg
           rm -rf *.dmg || true
-          codesign --force --options runtime -s ${{ secrets.MACOS_CODESIGN_IDENTITY }} --deep --strict ./flutter/build/macos/Build/Products/Release/LeftDesk.app -vvv
+          codesign --force --options runtime -s "${{ secrets.MACOS_CODESIGN_IDENTITY }}" --deep --strict ./flutter/build/macos/Build/Products/Release/LeftDesk.app -vvv
           create-dmg --icon "LeftDesk.app" 200 190 --hide-extension "LeftDesk.app" --window-size 800 400 --app-drop-link 600 185 leftdesk-${{ env.VERSION }}.dmg ./flutter/build/macos/Build/Products/Release/LeftDesk.app
-          codesign --force --options runtime -s ${{ secrets.MACOS_CODESIGN_IDENTITY }} --deep --strict leftdesk-${{ env.VERSION }}.dmg -vvv
+          codesign --force --options runtime -s "${{ secrets.MACOS_CODESIGN_IDENTITY }}" --deep --strict leftdesk-${{ env.VERSION }}.dmg -vvv
           # notarize the leftdesk-${{ env.VERSION }}.dmg
           rcodesign notary-submit --api-key-path ${{ github.workspace }}/leftdesk.json  --staple leftdesk-${{ env.VERSION }}.dmg
 
