@@ -37,7 +37,7 @@ class RelativeMouseState {
 
 class MainFlutterWindow: NSWindow {
     override func awakeFromNib() {
-        rustdesk_core_main();
+        leftdesk_core_main();
         let flutterViewController = FlutterViewController.init()
         let windowFrame = self.frame
         self.contentViewController = flutterViewController

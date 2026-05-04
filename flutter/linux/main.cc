@@ -24,10 +24,10 @@ bool flutter_rustdesk_core_main() {
       }
      return false;
    }
-   auto core_main = (RustDeskCoreMain) dlsym(librustdesk,"rustdesk_core_main");
+   auto core_main = (RustDeskCoreMain) dlsym(librustdesk,"leftdesk_core_main");
    char* error;
    if ((error = dlerror()) != nullptr) {
-       fprintf(stderr, "Program entry \"rustdesk_core_main\" is not found: %s\n", error);
+       fprintf(stderr, "Program entry \"leftdesk_core_main\" is not found: %s\n", error);
        return false;
    }
    return core_main();
