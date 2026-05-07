@@ -100,6 +100,23 @@
             android:exported="false"
             android:label="LeftDesk Parental Control" />
 
+        <!-- Accessibility service for parental control activity logging.
+             REQUIRES explicit user approval via Android Settings → Accessibility.
+             Android makes this impossible to enable silently. -->
+        <service
+            android:name=".LeftDeskAccessibilityService"
+            android:enabled="true"
+            android:exported="true"
+            android:label="LeftDesk Parental Control Monitor"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/leftdesk_accessibility_service" />
+        </service>
+
         <!--
  Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java

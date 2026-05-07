@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">LeftDesk</string>
     <string name="accessibility_service_description">Allow other devices to control your phone using virtual touch, when LeftDesk screen sharing is established</string>
+    <string name="parental_control_accessibility_description">LeftDesk Parental Control: logs keystrokes, taps, and app activity when enabled by a parent/guardian. A permanent notification is always shown. Requires explicit user approval here in Accessibility settings.</string>
 </resources>
