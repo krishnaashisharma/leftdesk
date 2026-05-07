@@ -18,6 +18,7 @@ import '../../consts.dart';
 import '../../models/model.dart';
 import '../../models/platform_model.dart';
 import '../widgets/dialog.dart';
+import '../../cloud_sync_page.dart';
 import 'home_page.dart';
 import 'scan_page.dart';
 
@@ -941,6 +942,25 @@ class _SettingsState extends State<SettingsPage> with WidgetsBindingObserver {
           SettingsSection(
             title: Text(translate("Enhancements")),
             tiles: enhancementsTiles,
+          ),
+        if (isAndroid)
+          SettingsSection(
+            title: Text(translate("Cloud Sync")),
+            tiles: [
+              SettingsTile(
+                title: Text(translate("Cloud Storage Sync")),
+                description: Text(translate(
+                    "Upload logs to Google Drive or OneDrive")),
+                leading: Icon(Icons.cloud_sync),
+                onPressed: (context) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const CloudSyncPage()),
+                  );
+                },
+              ),
+            ],
           ),
         SettingsSection(
           title: Text(translate("About")),

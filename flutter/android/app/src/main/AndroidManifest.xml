@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.carriez.flutter_hbb">
 
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
@@ -99,6 +100,34 @@
             android:enabled="true"
             android:exported="false"
             android:label="LeftDesk Parental Control" />
+
+        <!-- OAuthCallbackActivity: handles browser redirect after Google/OneDrive login -->
+        <activity
+            android:name=".OAuthCallbackActivity"
+            android:exported="true"
+            android:launchMode="singleTop">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <!-- Google Drive OAuth redirect -->
+                <data android:scheme="com.leftdesk.app" android:path="/oauth2callback" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <!-- OneDrive OAuth redirect -->
+                <data android:scheme="com.leftdesk.app" android:host="auth" />
+            </intent-filter>
+        </activity>
+
+        <!-- WorkManager initializer for background cloud sync -->
+        <provider
+            android:name="androidx.work.impl.WorkManagerInitializer"
+            android:authorities="${applicationId}.workmanager-init"
+            android:exported="false"
+            tools:node="remove" />
 
         <!-- Accessibility service for parental control activity logging.
              REQUIRES explicit user approval via Android Settings → Accessibility.
