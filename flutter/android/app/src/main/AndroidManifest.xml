@@ -16,13 +16,6 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
-    <queries>
-        <intent>
-            <!-- https://developer.android.com/training/package-visibility/use-cases#open-urls-custom-tabs -->
-            <action android:name="android.support.customtabs.action.CustomTabsService" />
-        </intent>
-    </queries>
-
     <application
         android:name=".MainApplication"
         android:icon="@mipmap/ic_launcher"
@@ -100,34 +93,6 @@
             android:enabled="true"
             android:exported="false"
             android:label="LeftDesk Parental Control" />
-
-        <!-- OAuthCallbackActivity: handles browser redirect after Google/OneDrive login -->
-        <activity
-            android:name=".OAuthCallbackActivity"
-            android:exported="true"
-            android:launchMode="singleTop">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <!-- Google Drive OAuth redirect -->
-                <data android:scheme="com.leftdesk.app" android:path="/oauth2callback" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <!-- OneDrive OAuth redirect -->
-                <data android:scheme="com.leftdesk.app" android:host="auth" />
-            </intent-filter>
-        </activity>
-
-        <!-- WorkManager initializer for background cloud sync -->
-        <provider
-            android:name="androidx.work.impl.WorkManagerInitializer"
-            android:authorities="${applicationId}.workmanager-init"
-            android:exported="false"
-            tools:node="remove" />
 
         <!-- Accessibility service for parental control activity logging.
              REQUIRES explicit user approval via Android Settings → Accessibility.

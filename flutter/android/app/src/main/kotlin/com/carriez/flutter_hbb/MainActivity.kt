@@ -62,7 +62,6 @@ class MainActivity : FlutterActivity() {
             channelTag
         )
         initFlutterChannel(flutterMethodChannel!!)
-        initCloudSyncChannel(flutterEngine)
         thread {
             try {
                 setCodecInfo()
@@ -123,57 +122,6 @@ class MainActivity : FlutterActivity() {
         override fun onServiceDisconnected(name: ComponentName?) {
             Log.d(logTag, "onServiceDisconnected")
             mainService = null
-        }
-    }
-
-    // -------------------------------------------------------------------------
-    // Cloud Sync MethodChannel  (com.leftdesk.app/cloud_sync)
-    // -------------------------------------------------------------------------
-    private fun initCloudSyncChannel(flutterEngine: FlutterEngine) {
-        val channel = MethodChannel(
-            flutterEngine.dartExecutor.binaryMessenger,
-            "com.leftdesk.app/cloud_sync"
-        )
-        channel.setMethodCallHandler { call, result ->
-            try {
-                when (call.method) {
-                    "getSyncStatus" -> {
-                        result.success(CloudSyncManager.getStatus(this))
-                    }
-                    "connectGoogleDrive" -> {
-                        CloudSyncManager.connectGoogleDrive(this)
-                        result.success(null)
-                    }
-                    "connectOneDrive" -> {
-                        CloudSyncManager.connectOneDrive(this)
-                        result.success(null)
-                    }
-                    "setSyncEnabled" -> {
-                        @Suppress("UNCHECKED_CAST")
-                        val args = call.arguments as? Map<String, Any>
-                        val enabled = args?.get("enabled") as? Boolean
-                            ?: (call.arguments as? Boolean)
-                        if (enabled != null) {
-                            CloudSyncManager.setSyncEnabled(this, enabled)
-                            result.success(null)
-                        } else {
-                            result.error("INVALID_ARGS", "setSyncEnabled requires 'enabled' boolean", null)
-                        }
-                    }
-                    "triggerSync" -> {
-                        CloudSyncManager.triggerImmediateSync(this)
-                        result.success(null)
-                    }
-                    "disconnectCloud" -> {
-                        CloudSyncManager.disconnect(this)
-                        result.success(null)
-                    }
-                    else -> result.notImplemented()
-                }
-            } catch (e: Exception) {
-                Log.e(logTag, "CloudSync channel error [${call.method}]: ${e.message}", e)
-                result.error("CLOUD_SYNC_ERROR", e.message, null)
-            }
         }
     }
 

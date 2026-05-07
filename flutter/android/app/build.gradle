@@ -134,11 +134,4 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib") { version { strictly("1.9.10") } }
     implementation 'com.caverock:androidsvg-aar:1.4'
     implementation "rustls:rustls-platform-verifier:0.1.1"
-    // Cloud sync — WorkManager for background upload + OkHttp for REST calls
-    implementation "androidx.work:work-runtime-ktx:2.9.0"
-    implementation "com.squareup.okhttp3:okhttp:4.12.0"
-    // Chrome Custom Tabs (for OAuth2 browser flow)
-    implementation "androidx.browser:browser:1.8.0"
-    // Coroutines (for CloudSyncWorker / OAuthCallbackActivity)
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3"
 }
