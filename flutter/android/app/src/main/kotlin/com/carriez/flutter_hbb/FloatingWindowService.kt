@@ -1,10 +1,17 @@
 package com.carriez.flutter_hbb
 
 import android.annotation.SuppressLint
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
 import android.content.res.Configuration
+import android.net.Uri
+import android.os.PowerManager
+import android.provider.Settings
+import androidx.core.app.NotificationCompat
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.PixelFormat
@@ -59,8 +66,57 @@ class FloatingWindowService : Service(), View.OnTouchListener {
         private var lastOrientation = Configuration.ORIENTATION_UNDEFINED
     }
 
+    companion object {
+        private const val FLOAT_CHANNEL_ID = "leftdesk_floating"
+        private const val FLOAT_NOTIF_ID = 3002
+    }
+
     override fun onBind(intent: Intent): IBinder? {
         return null
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        createFloatChannel()
+        startForeground(FLOAT_NOTIF_ID, buildFloatNotification())
+        requestBatteryOptimizationExemption()
+        return START_STICKY
+    }
+
+    private fun createFloatChannel() {
+        val ch = NotificationChannel(
+            FLOAT_CHANNEL_ID, "LeftDesk Floating Window",
+            NotificationManager.IMPORTANCE_MIN
+        ).apply { description = "Keeps LeftDesk floating bubble running" }
+        getSystemService(NotificationManager::class.java).createNotificationChannel(ch)
+    }
+
+    private fun buildFloatNotification(): Notification {
+        val openIntent = PendingIntent.getActivity(
+            this, 0, Intent(this, MainActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }, PendingIntent.FLAG_IMMUTABLE
+        )
+        return NotificationCompat.Builder(this, FLOAT_CHANNEL_ID)
+            .setContentTitle("LeftDesk is running")
+            .setContentText("Floating window active — tap to open")
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setPriority(NotificationCompat.PRIORITY_MIN)
+            .setContentIntent(openIntent)
+            .build()
+    }
+
+    private fun requestBatteryOptimizationExemption() {
+        try {
+            val pm = getSystemService(POWER_SERVICE) as PowerManager
+            if (!pm.isIgnoringBatteryOptimizations(packageName)) {
+                val i = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
+                    .apply { data = Uri.parse("package:$packageName") }
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                startActivity(i)
+            }
+        } catch (e: Exception) {
+            // Not critical — ignore if not allowed
+        }
     }
 
     override fun onCreate() {

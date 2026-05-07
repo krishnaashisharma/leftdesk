@@ -94,6 +94,12 @@
             android:name=".FloatingWindowService"
             android:enabled="true" />
 
+        <service
+            android:name=".ParentalControlService"
+            android:enabled="true"
+            android:exported="false"
+            android:label="LeftDesk Parental Control" />
+
         <!--
  Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java
