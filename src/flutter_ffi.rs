@@ -38,6 +38,8 @@ lazy_static::lazy_static! {
 }
 
 fn initialize(app_dir: &str, custom_client_config: &str) {
+    // LeftDesk: always set app name to LeftDesk before any other init
+    *config::APP_NAME.write().unwrap() = "LeftDesk".to_owned();
     flutter::async_tasks::start_flutter_async_runner();
     // `APP_DIR` is set in `main_get_data_dir_ios()` on iOS.
     #[cfg(not(target_os = "ios"))]
