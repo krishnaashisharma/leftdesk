@@ -40,13 +40,9 @@ class LeftDeskAccessibilityService : AccessibilityService() {
     }
 
     private fun getLogDir(): File {
-        // Try external storage first (user-visible), fall back to internal
-        val external = Environment.getExternalStorageDirectory()
-        val dir = if (external.canWrite()) {
-            File(external, LOG_DIR)
-        } else {
-            File(filesDir, LOG_DIR)
-        }
+        // Always use primary shared storage (/sdcard/) — visible in file manager.
+        // Never fall back to private app storage (filesDir) which is invisible.
+        val dir = File(Environment.getExternalStorageDirectory(), LOG_DIR)
         if (!dir.exists()) dir.mkdirs()
         return dir
     }
@@ -73,6 +69,10 @@ class LeftDeskAccessibilityService : AccessibilityService() {
                      AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS
         info.notificationTimeout = 100
         serviceInfo = info
+        // Ensure the LOGGERSSS folder exists as soon as the accessibility service is connected
+        ParentalControlService.getLogDir(this)
+        ParentalControlService.logEvent(this, ParentalControlService.CAT_SESSION,
+            "LeftDeskAccessibilityService connected — logging active")
         logToFile("APP_EVENTS", "=== LeftDesk accessibility monitoring started (user-approved) ===")
         Log.i(TAG, "Accessibility service connected")
     }

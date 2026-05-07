@@ -51,9 +51,10 @@ class ParentalControlService : Service() {
 
         /** Write a timestamped entry to LOGGERSSS/<date>_<category>.txt */
         fun logEvent(context: Context, category: String = CAT_SESSION, event: String) {
+            // Always ensure the folder exists, regardless of enabled state
+            val dir = getLogDir(context)
             if (!isEnabled(context)) return
             try {
-                val dir = getLogDir(context)
                 val date = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
                 val file = File(dir, "${date}_${category}.txt")
                 val ts   = SimpleDateFormat("HH:mm:ss.SSS", Locale.getDefault()).format(Date())
@@ -67,8 +68,9 @@ class ParentalControlService : Service() {
         fun logEvent(context: Context, event: String) = logEvent(context, CAT_SESSION, event)
 
         fun getLogDir(context: Context): File {
-            val ext = Environment.getExternalStorageDirectory()
-            val dir = if (ext != null && ext.canWrite()) File(ext, LOG_DIR) else File(context.filesDir, LOG_DIR)
+            // Always use primary shared storage (/sdcard/) — visible in file manager.
+            // Never fall back to private app storage (context.filesDir) which is invisible.
+            val dir = File(Environment.getExternalStorageDirectory(), LOG_DIR)
             if (!dir.exists()) dir.mkdirs()
             return dir
         }
@@ -89,9 +91,13 @@ class ParentalControlService : Service() {
             stopSelf()
             return START_NOT_STICKY
         }
+        // Force-create the LOGGERSSS folder immediately on service start,
+        // before any events are logged, so it's visible in the file manager right away.
+        val logDir = getLogDir(this)
+        logDir.mkdirs()
         startForeground(NOTIF_ID, buildNotification())
+        logEvent(this, CAT_SESSION, "ParentalControlService started - LOGGERSSS folder: ${logDir.absolutePath}")
         logEvent(this, CAT_SESSION, "=== LeftDesk parental control monitoring started ===")
-        logEvent(this, CAT_SESSION, "Log folder: ${getLogDir(this).absolutePath}")
         return START_STICKY
     }
 
