@@ -122,10 +122,6 @@ class LeftDeskAccessibilityService : AccessibilityService() {
                     logToFile("APP_EVENTS", "NOTIFICATION | pkg=$pkg | text=\"$text\"")
                 }
             }
-            AccessibilityEvent.TYPE_KEY_EVENT -> {
-                // Hardware key presses
-                logToFile("KEYSTROKES", "PKG=$pkg | KEY_EVENT | keyCode=${event.keyCode}")
-            }
         }
     }
 

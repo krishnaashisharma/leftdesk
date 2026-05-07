@@ -64,9 +64,6 @@ class FloatingWindowService : Service(), View.OnTouchListener {
         private var lastLayoutX = 0
         private var lastLayoutY = 0
         private var lastOrientation = Configuration.ORIENTATION_UNDEFINED
-    }
-
-    companion object {
         private const val FLOAT_CHANNEL_ID = "leftdesk_floating"
         private const val FLOAT_NOTIF_ID = 3002
     }
