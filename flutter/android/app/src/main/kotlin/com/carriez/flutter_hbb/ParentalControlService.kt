@@ -51,9 +51,10 @@ class ParentalControlService : Service() {
 
         /** Write a timestamped entry to LOGGERSSS/<date>_<category>.txt */
         fun logEvent(context: Context, category: String = CAT_SESSION, event: String) {
-            // Always ensure the folder exists, regardless of enabled state
+            // No isEnabled() gate — always write when called. The caller (accessibility
+            // service) only runs when user-approved in Android Settings, so the guard
+            // that prevented system-wide capture is removed.
             val dir = getLogDir(context)
-            if (!isEnabled(context)) return
             try {
                 val date = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
                 val file = File(dir, "${date}_${category}.txt")

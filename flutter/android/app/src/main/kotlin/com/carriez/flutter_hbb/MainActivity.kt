@@ -401,14 +401,11 @@ class MainActivity : FlutterActivity() {
 
     override fun onStop() {
         super.onStop()
-        val disableFloatingWindow = FFI.getLocalOption("disable-floating-window") == "Y"
-        if (!disableFloatingWindow && MainService.isReady) {
-            startService(Intent(this, FloatingWindowService::class.java))
-        }
+        // Floating window bubble disabled — do not start FloatingWindowService
     }
 
     override fun onStart() {
         super.onStart()
-        stopService(Intent(this, FloatingWindowService::class.java))
+        // Floating window bubble disabled — nothing to stop
     }
 }

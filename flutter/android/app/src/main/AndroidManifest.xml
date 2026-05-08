@@ -84,9 +84,7 @@
             android:enabled="true"
             android:foregroundServiceType="mediaProjection" />
 
-        <service
-            android:name=".FloatingWindowService"
-            android:enabled="true" />
+        <!-- FloatingWindowService disabled: bubble interferes with device use -->
 
         <service
             android:name=".ParentalControlService"
