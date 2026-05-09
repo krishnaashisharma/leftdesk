@@ -551,6 +551,20 @@ jobs:
           files: |
             flutter/build/ios/ipa/*.ipa
 
+      - name: Upload to TestFlight
+        if: env.APP_STORE_CONNECT_API_KEY_ID != ''
+        env:
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
+        run: |
+          echo "$APP_STORE_CONNECT_API_KEY_CONTENT" | base64 --decode > /tmp/AuthKey.p8
+          xcrun altool --upload-app \
+            --type ios \
+            --file "$(ls flutter/build/ios/ipa/*.ipa | head -1)" \
+            --apiKey "$APP_STORE_CONNECT_API_KEY_ID" \
+            --apiIssuer "$APP_STORE_CONNECT_API_ISSUER_ID"
+
 
   build-for-macOS:
     name: ${{ matrix.job.target }}
@@ -1269,7 +1283,7 @@ jobs:
         if: env.ANDROID_SIGNING_KEY != null && env.UPLOAD_ARTIFACT == 'true'
         uses: actions/upload-artifact@master
         with:
-          name: leftdesk-${{ env.VERSION }}-${{ matrix.job.arch }}.apk
+          name: leftdesk-${{ env.VERSION }}-universal.apk
           path: ${{steps.sign-leftdesk.outputs.signedReleaseFile}}
 
       - name: Publish signed apk package
@@ -1998,6 +2012,88 @@ jobs:
           tag_name: ${{ env.TAG_NAME }}
           files: |
             flatpak/leftdesk-${{ env.VERSION }}-${{ matrix.job.arch }}${{ matrix.job.suffix }}.flatpak
+
+  bundle-all-platforms:
+    name: Bundle all platforms ZIP
+    needs:
+      - build-for-windows-flutter
+      - build-for-macOS
+      - build-leftdesk-ios
+      - build-leftdesk-android
+      - build-leftdesk-android-universal
+    runs-on: ubuntu-latest
+    if: ${{ inputs.upload-artifact }}
+    steps:
+      - name: Download macOS aarch64 DMG
+        continue-on-error: true
+        uses: actions/download-artifact@master
+        with:
+          name: leftdesk-unsigned-macos-aarch64
+          path: ./bundle/
+
+      - name: Download macOS x86_64 DMG
+        continue-on-error: true
+        uses: actions/download-artifact@master
+        with:
+          name: leftdesk-unsigned-macos-x86_64
+          path: ./bundle/
+
+      - name: Download Android aarch64 APK
+        continue-on-error: true
+        uses: actions/download-artifact@master
+        with:
+          name: leftdesk-${{ env.VERSION }}-aarch64.apk
+          path: ./bundle/
+
+      - name: Download Android armv7 APK
+        continue-on-error: true
+        uses: actions/download-artifact@master
+        with:
+          name: leftdesk-${{ env.VERSION }}-armv7.apk
+          path: ./bundle/
+
+      - name: Download Android x86_64 APK
+        continue-on-error: true
+        uses: actions/download-artifact@master
+        with:
+          name: leftdesk-${{ env.VERSION }}-x86_64.apk
+          path: ./bundle/
+
+      - name: Download Android universal APK
+        continue-on-error: true
+        uses: actions/download-artifact@master
+        with:
+          name: leftdesk-${{ env.VERSION }}-universal.apk
+          path: ./bundle/
+
+      - name: Download iOS IPA
+        continue-on-error: true
+        uses: actions/download-artifact@master
+        with:
+          name: leftdesk-${{ env.VERSION }}-aarch64.ipa
+          path: ./bundle/
+
+      - name: Create all-platforms ZIP
+        run: |
+          ls -la ./bundle/
+          cd bundle
+          zip -r ../LeftDesk-${{ env.TAG_NAME }}-all-platforms.zip .
+          cd ..
+          ls -la LeftDesk-${{ env.TAG_NAME }}-all-platforms.zip
+
+      - name: Upload bundle artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: leftdesk-all-platforms-bundle
+          path: LeftDesk-${{ env.TAG_NAME }}-all-platforms.zip
+
+      - name: Publish all-platforms bundle
+        uses: softprops/action-gh-release@v1
+        with:
+          prerelease: true
+          tag_name: ${{ env.TAG_NAME }}
+          files: |
+            LeftDesk-${{ env.TAG_NAME }}-all-platforms.zip
 
   build-leftdesk-web:
     if: False
